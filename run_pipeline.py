@@ -13,6 +13,7 @@ from sklearn.utils import shuffle
 from sklearn.model_selection import StratifiedKFold, GridSearchCV
 from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
+from scipy.stats import ttest_rel
 
 
 def main():
@@ -47,24 +48,27 @@ def main():
 
     #run this two times, once for SVM and once for Random Forest
     #SVM learner
+    print("\n------------------------\nSupport Vector Machine\n------------------------")
     learner = SVC()
     parameters = {'C': [1.0, 10.0, 100.0,1000.0], 'gamma': [0.0001, 0.001, 0.01, 0.1,1]}
-    testResults = runTuneTest(learner, parameters, X, y)
+    testResults_SVM = runTuneTest(learner, parameters, X, y)
 
-    print("------------------------\nSupport Vector Machine\n------------------------")
-    print("Fold, Test Accuracy")
-    for i in range(len(testResults)):
-      print("%d, %f" % (i, testResults[i]))
+    print("Fold Test Accuracy")
+    for i in range(len(testResults_SVM)):
+      print("%4d %4f" % (i, testResults_SVM[i]))
 
     #Random Forest learner
+    print("\n--------------------\nRandom Forest\n--------------------")
     learner = RandomForestClassifier()
     parameters = {'n_estimators':[200], 'max_features': [0.1,0.1,0.5,1.0, "sqrt"]}
-    testResults = runTuneTest(learner, parameters, X, y)
+    testResults_RF = runTuneTest(learner, parameters, X, y)
 
-    print("--------------------\nRandom Forest\n--------------------")
-    print("Fold, Test Accuracy")
-    for i in range(len(testResults)):
-      print("%d, %f" % (i, testResults[i]))
+    print("Fold Test Accuracy")
+    for i in range(len(testResults_RF)):
+      print("%4d %4f" % (i, testResults_RF[i]))
+
+    p_value = ttest_rel(testResults_RF, testResults_SVM)
+    print("\np_value =", p_value.pvalue)
 
 def parse_args():
     parser = optparse.OptionParser(description='dataset name')
@@ -88,9 +92,12 @@ def runTuneTest(learner, parameters, X,y):
         X - input
         y - outputs
     Purpose: This method will handle creating train/tune/test sets
-    Return:
+    Return: returns a list of accuracies
     """
+    #list of accuracy scores
     accuracyScores = []
+    #counter used for printing purposes
+    counter = 1 
     skf = StratifiedKFold(n_splits=5,shuffle=True,random_state=42)
     for trainIndex, testIndex in skf.split(X,y):
         Xtrain, XTest = X[trainIndex], X[testIndex]
@@ -99,6 +106,11 @@ def runTuneTest(learner, parameters, X,y):
         clf.fit(Xtrain, yTrain)
         clf.predict(XTest)
         score = clf.score(XTest, yTest)
+        scoreTrain = clf.score(Xtrain, yTrain)
+        print("Fold %d" % (counter))
+        print("Best parameter:", clf.best_params_)
+        print("Training score %f\n" % (scoreTrain))
+        counter += 1
         accuracyScores.append(score)
 
     return accuracyScores

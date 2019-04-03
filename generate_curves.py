@@ -12,12 +12,14 @@ import optparse
 import numpy as np
 import run_pipeline
 import sys
+import matplotlib.pyplot as plt
 
 from sklearn.datasets import fetch_mldata, load_breast_cancer, fetch_20newsgroups_vectorized
 from sklearn.utils import shuffle
 from sklearn.model_selection import validation_curve
 from sklearn.svm import SVC
 from sklearn.ensemble import RandomForestClassifier
+
 
 def main():
 
@@ -56,23 +58,53 @@ def main():
     
     trainScores, testScores = validation_curve(learner, X, y,'gamma', gammaRange)
 
+    avgTrainAcc = []
+    avgTestAcc = []
     print("Gamma Value, Train Accuracy, Test Accuracy")
     for i in range(len(testScores)):
       avgAccuracyList = avgAccuracy(trainScores[i], testScores[i])
+      avgTrainAcc.append(avgAccuracyList[0])
+      avgTestAcc.append(avgAccuracyList[1])
       print("%7.2g %f %f" % (gammaRange[i], avgAccuracyList[0], avgAccuracyList[1]))
     
+    #plots
+    fig = plt.figure()
+    plt.plot(gammaRange, avgTrainAcc, 'bo-')
+    plt.plot(gammaRange, avgTestAcc, 'r*-')
+    plt.xscale('log')
+    plt.xlabel("Gamma Range")
+    plt.ylabel("Accuracy")
+    plt.title("Accuracy vs Gamma Range")
+    plt.legend(["Test Accuracy", "Train Accuracy"])
+    plt.show()
+
     #Random Forest learner
     learner = RandomForestClassifier()
     #creates a list of n_estimator values that the parameter "n_estimator" will take on
     estimatorRange = list(range(1,202,10))
 
     trainScores, testScores = validation_curve(learner, X, y, 'n_estimators', estimatorRange)
+    
+    avgTrainAcc = []
+    avgTestAcc = []
     print("\nNumber of Trees, Train Accuracy, Test Accuracy")
     for i in range(len(testScores)):
       avgAccuracyList = avgAccuracy(trainScores[i], testScores[i])
+      avgTrainAcc.append(avgAccuracyList[0])
+      avgTestAcc.append(avgAccuracyList[1])
       print("%6.1d %f %f" % (estimatorRange[i], avgAccuracyList[0], avgAccuracyList[1]))
-      
- 
+
+    #plots
+    fig = plt.figure()
+    plt.plot(estimatorRange, avgTrainAcc, 'bo-')
+    plt.plot(estimatorRange, avgTestAcc, 'r*-')
+    plt.xlabel("Number of Estimators")
+    plt.ylabel("Accuracy")
+    plt.title("Accuracy vs Number of Estimators")
+    plt.legend(["Test Accuracy", "Train Accuracy"])
+    plt.show() 
+
+
 def parse_args():
     parser = optparse.OptionParser(description='dataset name')
 
