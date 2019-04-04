@@ -37,7 +37,6 @@ def main():
         X = X[:1000]
         y = y[:1000]
         X = X/255
-        print(X.shape)
     elif opts.dataset_name == "news":
         data = fetch_20newsgroups_vectorized(subset='all', data_home="/home/smathieson/public/cs66/sklearn"
             "-data/")
@@ -46,7 +45,6 @@ def main():
         X,y = shuffle(X,y)
         X = X[:1000]
         y = y[:1000]
-        print (X.shape)
     else:
         print("Dataset not found")
         sys.exit()
@@ -74,8 +72,8 @@ def main():
     plt.xscale('log')
     plt.xlabel("Gamma Range")
     plt.ylabel("Accuracy")
-    plt.title("Accuracy vs Gamma Range")
-    plt.legend(["Test Accuracy", "Train Accuracy"])
+    plt.title("MNIST Dataset - Accuracy vs Gamma Range")
+    plt.legend(["Train Accuracy", "Test Accuracy"])
     plt.show()
 
     #Random Forest learner
@@ -100,8 +98,8 @@ def main():
     plt.plot(estimatorRange, avgTestAcc, 'r*-')
     plt.xlabel("Number of Estimators")
     plt.ylabel("Accuracy")
-    plt.title("Accuracy vs Number of Estimators")
-    plt.legend(["Test Accuracy", "Train Accuracy"])
+    plt.title("MNIST Dataset - Accuracy vs Number of Estimators")
+    plt.legend(["Train Accuracy", "Test Accuracy"])
     plt.show() 
 
 
